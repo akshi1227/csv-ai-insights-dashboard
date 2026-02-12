@@ -15,9 +15,12 @@ Analysis generated using statistical heuristics (AI unavailable). The dataset co
     columns.forEach(col => {
         const stats = summary.columnStats[col];
         if (stats.type === 'number') {
-            analysis += `- **${col}**: Ranges from ${stats.min} to ${stats.max} (Avg: ${stats.mean.toFixed(2)}).\n`;
+            const min = stats.min !== undefined ? stats.min : '?';
+            const max = stats.max !== undefined ? stats.max : '?';
+            const avg = stats.mean !== undefined ? stats.mean.toFixed(2) : '?';
+            analysis += `- **${col}**: Ranges from ${min} to ${max} (Avg: ${avg}).\n`;
         } else {
-            analysis += `- **${col}**: Contains categorical data with ${stats.uniqueCount} unique values.\n`;
+            analysis += `- **${col}**: Contains categorical data with ${stats.uniqueCount || '?'} unique values.\n`;
         }
     });
 

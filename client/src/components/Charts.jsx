@@ -66,16 +66,27 @@ const Charts = ({ summary }) => {
     };
 
     return (
-        <div className="chart-container" style={{
-            marginTop: '2rem',
-            padding: '1.5rem',
-            background: 'rgba(0,0,0,0.2)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '16px'
-        }}>
+    return (
+        <div className="chart-container glass-card">
             <Bar options={options} data={data} />
+
+            <style>{`
+                .chart-container {
+                    margin-top: 2rem;
+                    padding: 1.5rem;
+                    position: relative;
+                    height: 400px;
+                    width: 100%;
+                }
+                @media (max-width: 768px) {
+                    .chart-container {
+                        height: 300px;
+                        padding: 1rem;
+                    }
+                }
+            `}</style>
         </div>
+    );
     );
 };
 
