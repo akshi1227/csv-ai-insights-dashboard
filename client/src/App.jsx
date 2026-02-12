@@ -30,6 +30,30 @@ function App() {
     setRefreshHistory(prev => prev + 1);
   };
 
+  // Real-Time Data Editing
+  const updateData = (rowIndex, column, value) => {
+    setData(prevData => {
+      if (!prevData || !prevData.summary || !prevData.summary.preview) return prevData;
+
+      const newPreview = [...prevData.summary.preview];
+      const updatedRow = { ...newPreview[rowIndex] };
+
+      // Try to parse number if possible, else keep string
+      const numVal = parseFloat(value);
+      updatedRow[column] = isNaN(numVal) ? value : numVal;
+
+      newPreview[rowIndex] = updatedRow;
+
+      return {
+        ...prevData,
+        summary: {
+          ...prevData.summary,
+          preview: newPreview
+        }
+      };
+    });
+  };
+
   return (
     <div className="app-container">
       <header className="app-header">
@@ -56,13 +80,15 @@ function App() {
             <div className="dashboard">
               <div className="top-bar">
                 <h2>Analysis: {data.filename}</h2>
-                <button onClick={() => setData(null)} className="text-btn">New Upload</button>
+                <div className="actions">
+                  <button onClick={() => setData(null)} className="text-btn">New Upload</button>
+                </div>
               </div>
 
-              {/* Data Preview */}
-              <Preview data={data.summary} />
+              {/* Data Preview (Editable) */}
+              <Preview data={data.summary} onUpdate={updateData} />
 
-              {/* Charts */}
+              {/* Charts (Updates Real-Time) */}
               <Charts summary={data.summary} />
 
               {/* AI Insights & Save */}

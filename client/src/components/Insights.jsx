@@ -89,11 +89,9 @@ const Insights = ({ summary, filename, onSave }) => {
     return (
         <div className="insights-container">
             <div className="actions">
-                {!insights && (
-                    <button onClick={generateInsights} disabled={loading} className="primary-btn pulse-anim">
-                        {loading ? 'Analyzing Deeply...' : 'Generate Deep AI Analysis'}
-                    </button>
-                )}
+                <button onClick={generateInsights} disabled={loading} className="primary-btn pulse-anim">
+                    {loading ? 'Analyzing...' : (insights ? 'Re-Analyze with New Data' : 'Generate Deep AI Analysis')}
+                </button>
                 {insights && (
                     <button onClick={saveReport} disabled={saving} className="secondary-btn">
                         {saving ? 'Saving...' : 'Save Report'}
@@ -105,6 +103,7 @@ const Insights = ({ summary, filename, onSave }) => {
                 <>
                     <div className="markdown-content glass-card">
                         <div className="export-actions">
+                            <button onClick={() => window.print()} className="text-btn">Export PDF</button>
                             <button onClick={() => navigator.clipboard.writeText(insights)} className="text-btn">Copy</button>
                             <button onClick={() => {
                                 const blob = new Blob([insights], { type: 'text/plain' });
@@ -113,7 +112,7 @@ const Insights = ({ summary, filename, onSave }) => {
                                 a.href = url;
                                 a.download = `${filename}_insights.txt`;
                                 a.click();
-                            }} className="text-btn">Download</button>
+                            }} className="text-btn">Download .txt</button>
                         </div>
                         <h3>AI Executive Analysis</h3>
                         <ReactMarkdown>{insights}</ReactMarkdown>
@@ -146,7 +145,8 @@ const Insights = ({ summary, filename, onSave }) => {
                         </form>
                     </div>
                 </>
-            )}
+            )
+            }
 
             <style>{`
                 .glass-card {
@@ -190,7 +190,7 @@ const Insights = ({ summary, filename, onSave }) => {
                     gap: 1rem;
                 }
             `}</style>
-        </div>
+        </div >
     );
 };
 
