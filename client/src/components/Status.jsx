@@ -8,25 +8,30 @@ const Status = () => {
         fetch(endpoints.status)
             .then(res => res.json())
             .then(data => setStatus(data))
-            .catch(err => setStatus({ error: 'Offline' }));
+            .catch(err => {
+                console.error("Status check failed:", err);
+                setStatus({ error: 'Offline' });
+            });
     }, []);
 
-    if (!status) return <div>Loading system status...</div>;
+    if (!status) return <div className="status-label">Loading...</div>;
 
     return (
-        <div className="status-container">
-            <h3>System Status</h3>
-            <div className="status-grid">
-                <div className={`status-item ${status.backend === 'OK' ? 'ok' : 'error'}`}>
-                    Backend: {status.backend || 'Offline'}
-                </div>
-                <div className={`status-item ${status.database === 'OK' ? 'ok' : 'error'}`}>
-                    Storage: {status.database}
-                </div>
-                <div className={`status-item ${status.llm?.includes('Ready') ? 'ok' : 'warn'}`}>
-                    LLM: {status.llm}
-                </div>
+        <div className="status-grid">
+            <div className="status-label">
+                <span className={`status-dot ${status.backend === 'OK' ? 'ok' : 'error'}`}></span>
+                Backend
             </div>
+            <div className="status-label">
+                <span className={`status-dot ${status.database === 'OK' ? 'ok' : 'error'}`}></span>
+                Storage
+            </div>
+            {status.llm && (
+                <div className="status-label">
+                    <span className={`status-dot ${status.llm.includes('Ready') ? 'ok' : 'warn'}`}></span>
+                    AI
+                </div>
+            )}
         </div>
     );
 };

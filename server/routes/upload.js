@@ -46,6 +46,7 @@ router.post('/', upload.single('csvFile'), async (req, res) => {
 
     } catch (error) {
         console.error('Upload error:', error);
+        console.error('Error stack:', error.stack);
         res.status(500).json({ error: 'Failed to process CSV' });
     }
 });

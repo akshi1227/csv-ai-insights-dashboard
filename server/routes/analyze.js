@@ -24,19 +24,31 @@ router.post('/', async (req, res) => {
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `
-        You are an expert data analyst. 
-        Analyze the following dataset summary and provide insights:
+        You are an elite Data Scientist. Your goal is to provide a comprehensive, executive-level analysis of the provided dataset summary.
         
         Dataset Summary:
         ${JSON.stringify(summary, null, 2)}
         
-        Please provide a response in Markdown format with the following sections:
-        1. **Trends**: Identify any patterns or trends based on the summary (e.g. numerical ranges, categories).
-        2. **Outliers**: Potential outliers based on min/max or sample values.
-        3. **Data Quality**: Issues like missing values (nullCount) or inconsistencies.
-        4. **Recommendations**: What should be checked next?
+        Provide a structured analysis in Markdown format using the following sections:
         
-        Keep it concise and professional.
+        ## 📊 Executive Summary
+        A 2-3 sentence high-level overview of what this dataset represents and the most critical finding.
+
+        ## 📈 Key Trends & Patterns
+        - Identify correlations, rising/falling trends, or dominant categories.
+        - Use bullet points for clarity.
+
+        ## ⚠️ Anomalies & Outliers
+        - Highlight any data points that deviate significantly from the norm.
+        - Mention potential data quality issues (null values, extreme ranges).
+
+        ## 💡 Strategic Recommendations
+        - Actionable advice based on the data. What should the user do next?
+
+        ## 🔍 Quick Stats
+        - A small table or list of key metrics (highest/lowest values, averages).
+        
+        Tone: Professional, Insightful, and Innovative. Use emojis sparingly to make headings pop.
         `;
 
         const result = await model.generateContent(prompt);

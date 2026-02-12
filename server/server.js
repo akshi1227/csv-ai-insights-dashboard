@@ -16,11 +16,13 @@ const statusRoutes = require('./routes/status');
 const uploadRoutes = require('./routes/upload');
 const analyzeRoutes = require('./routes/analyze');
 const reportRoutes = require('./routes/reports');
+const chatRoutes = require('./routes/chat');
 
 app.use('/status', statusRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/analyze', analyzeRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Serve static files from React app in production
 if (process.env.NODE_ENV === 'production') {
@@ -30,7 +32,11 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Start Server only if run directly
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+module.exports = app;
