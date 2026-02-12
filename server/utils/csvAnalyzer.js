@@ -1,12 +1,24 @@
 const fs = require('fs');
 const csv = require('csv-parser');
+const { Readable } = require('stream');
 
-const analyzeCsv = (filePath) => {
+const analyzeCsv = (input) => {
     return new Promise((resolve, reject) => {
         const results = [];
+        let rowCount = 0;
         const columnStats = {};
 
-        fs.createReadStream(filePath)
+        // Determine input stream: is it a file path (string) or a buffer?
+        let stream;
+        if (typeof input === 'string') {
+            stream = fs.createReadStream(input);
+        } else if (Buffer.isBuffer(input)) {
+            stream = Readable.from(input);
+        } else {
+            return reject(new Error('Invalid input type for CSV analysis'));
+        }
+
+        stream
             .pipe(csv())
             .on('data', (data) => {
                 results.push(data);

@@ -8,8 +8,33 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: '*', // Allow all origins for now to fix generic CORS issues
+    methods: ['GET', 'POST', 'OPTIONS']
+}));
 app.use(express.json());
+
+// Operational Rigor: Structured Logging
+app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        console.log(JSON.stringify({
+            timestamp: new Date().toISOString(),
+            method: req.method,
+            path: req.path,
+            status: res.statusCode,
+            duration_ms: duration,
+            user_agent: req.get('user-agent')
+        }));
+    });
+    next();
+});
+
+// Health Check
+app.get('/', (req, res) => {
+    res.json({ status: 'OK', message: 'Backend is running 🚀', timestamp: new Date() });
+});
 
 // Routes
 const statusRoutes = require('./routes/status');
