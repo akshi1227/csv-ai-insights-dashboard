@@ -12,7 +12,8 @@ app.use(cors({
     origin: '*', // Allow all origins for now to fix generic CORS issues
     methods: ['GET', 'POST', 'OPTIONS']
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Increased limit for large CSV summaries
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Operational Rigor: Structured Logging
 app.use((req, res, next) => {
