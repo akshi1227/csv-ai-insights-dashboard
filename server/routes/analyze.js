@@ -2,6 +2,33 @@ const express = require('express');
 const router = express.Router();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
+// Fallback generator if AI fails
+const generateFallbackAnalysis = (summary) => {
+    const columns = Object.keys(summary.columnStats || {});
+    let analysis = `## 📊 Executive Summary (Offline Mode)
+    
+Analysis generated using statistical heuristics (AI unavailable). The dataset contains **${summary.rowCount} rows** and **${columns.length} columns**.
+
+## 📈 Key Patterns
+`;
+
+    columns.forEach(col => {
+        const stats = summary.columnStats[col];
+        if (stats.type === 'number') {
+            analysis += `- **${col}**: Ranges from ${stats.min} to ${stats.max} (Avg: ${stats.mean.toFixed(2)}).\n`;
+        } else {
+            analysis += `- **${col}**: Contains categorical data with ${stats.uniqueCount} unique values.\n`;
+        }
+    });
+
+    analysis += `\n## 💡 Recommendations
+- Check 504 Gateway Timeouts on Vercel (function took too long).
+- Verify GEMINI_API_KEY is set in Vercel Environment Variables.
+`;
+
+    return analysis;
+};
+
 router.post('/', async (req, res) => {
     const { summary } = req.body;
 
@@ -11,55 +38,53 @@ router.post('/', async (req, res) => {
 
     try {
         const apiKey = process.env.GEMINI_API_KEY;
+
+        // 1. Check Config
         if (!apiKey) {
-            // Mock response if no key (for testing without billing)
-            // Or return error. Let's return error but with a hint.
-            return res.status(500).json({
-                error: 'Server missing GEMINI_API_KEY',
-                mock: 'This is a mock response because API key is missing.'
-            });
+            console.warn('Missing GEMINI_API_KEY. Using fallback.');
+            return res.json({ insights: generateFallbackAnalysis(summary) });
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `
-        You are an elite Data Scientist. Your goal is to provide a comprehensive, executive-level analysis of the provided dataset summary.
+        Analyze this dataset summary and provide 3 very short, bulleted sections:
         
-        Dataset Summary:
-        ${JSON.stringify(summary, null, 2)}
+        ## 📊 Summary
+        (2 sentences max)
+
+        ## 📈 Trends
+        (3 bullet points max)
+
+        ## 💡 Action
+        (1 recommendation)
         
-        Provide a structured analysis in Markdown format using the following sections:
+        Keep it under 300 words. FAST response.
         
-        ## 📊 Executive Summary
-        A 2-3 sentence high-level overview of what this dataset represents and the most critical finding.
-
-        ## 📈 Key Trends & Patterns
-        - Identify correlations, rising/falling trends, or dominant categories.
-        - Use bullet points for clarity.
-
-        ## ⚠️ Anomalies & Outliers
-        - Highlight any data points that deviate significantly from the norm.
-        - Mention potential data quality issues (null values, extreme ranges).
-
-        ## 💡 Strategic Recommendations
-        - Actionable advice based on the data. What should the user do next?
-
-        ## 🔍 Quick Stats
-        - A small table or list of key metrics (highest/lowest values, averages).
-        
-        Tone: Professional, Insightful, and Innovative. Use emojis sparingly to make headings pop.
+        Summary: ${JSON.stringify(summary).substring(0, 5000)}
         `;
 
-        const result = await model.generateContent(prompt);
+        // 2. Race strict timeout (5 seconds for Instant Feel)
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('AI Usage Limit / Timeout')), 5000)
+        );
+
+        const aiPromise = model.generateContent(prompt);
+
+        const result = await Promise.race([aiPromise, timeoutPromise]);
         const response = await result.response;
         const text = response.text();
 
         res.json({ insights: text });
 
     } catch (error) {
-        console.error('LLM Error:', error);
-        res.status(500).json({ error: 'Failed to generate insights' });
+        console.error('LLM Error/Timeout:', error.message);
+        // 3. Fallback on Error (don't crash the UI)
+        res.json({
+            insights: generateFallbackAnalysis(summary),
+            warning: 'AI request failed, showing statistical analysis.'
+        });
     }
 });
 

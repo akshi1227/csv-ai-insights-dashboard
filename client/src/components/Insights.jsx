@@ -25,8 +25,8 @@ const Insights = ({ summary, filename, onSave }) => {
                 setInsights(data.insights);
             }
         } catch (err) {
-            console.error(err);
-            alert('Failed to generate insights');
+            console.error('Insights Generation Error:', err);
+            alert(`Failed to generate insights: ${err.message || 'Unknown error'}`);
         } finally {
             setLoading(false);
         }

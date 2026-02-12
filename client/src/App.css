@@ -7,6 +7,8 @@
   flex-direction: column;
   gap: 2rem;
   min-height: 100vh;
+  /* Ensure overflow is handled by the window or this container */
+  overflow-y: auto;
 }
 
 /* Header */
@@ -34,10 +36,17 @@
 
 /* Main Content Area */
 .app-main {
-  display: grid;
-  grid-template-columns: 280px 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
-  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .app-main {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    align-items: start;
+  }
 }
 
 /* Glass Cards (Sidebar & Dashboard) */
