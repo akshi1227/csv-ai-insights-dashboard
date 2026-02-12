@@ -66,7 +66,6 @@ const Charts = ({ summary }) => {
     };
 
     return (
-    return (
         <div className="chart-container glass-card">
             <Bar options={options} data={data} />
 
@@ -86,7 +85,6 @@ const Charts = ({ summary }) => {
                 }
             `}</style>
         </div>
-    );
     );
 };
 
